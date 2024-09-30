@@ -3,7 +3,7 @@ const express = require('express');
 const { Op } = require ('sequelize');
 const bcrypt = require ('bcryptjs');
 const router = express.Router();
-const { setTokenCookie, restoreUser } = require('../..utils/auth');
+const { setTokenCookie, restoreUser } = require('/Users/jameshightower/Desktop/swe/projects/01-BetterBnB/backend/utils/auth');
 const { User } = require('../../db/models');
 
 
