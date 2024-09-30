@@ -1,56 +1,39 @@
 // backend/routes/api/index.js
-const router = require('express').Router();
+const router = require("express").Router();
+const { setTokenCookie, restoreUser, requireAuth } = require('../../utils/auth.js');
+const { User } = require('../../db/models');
 
-router.post('/test', function(req, res) {
-    res.json({ requestBody: req.body });
-  });
+// Connect restoreUser middleware to the API router
+  // If current user session is valid, set req.user to the user in the database
+  // If current user session is not valid, set req.user to null
+router.use(restoreUser);
 
-  // POST /api/login
-router.post('/login', async (req, res) => {
-  const { credential, password } = req.body;
+// GET /api/set-token-cookie
+router.get('/set-token-cookie', async (_req, res) => {
   const user = await User.findOne({
     where: {
-      [Sequelize.Op.or]: [{ username: credential }, { email: credential }],
-    },
+      username: 'Demo-lition'
+    }
   });
-  if (!user) {
-    const err = new Error('Invalid credential');
-    err.title = 'Invalid credential';
-    err.errors = { message: 'Invalid credential' };
-    err.status = 401;
-    return next(err);
-  }
-  const isValidPassword = await bcrypt.compare(password, user.hashedPassword);
-  if (!isValidPassword) {
-    const err = new Error('Invalid password');
-    err.title = 'Invalid password';
-    err.errors = { message: 'Invalid password' };
-    err.status = 401;
-    return next(err);
-  }
-  const token = await setTokenCookie(res, user);
+  setTokenCookie(res, user);
   return res.json({ user: user });
 });
 
+// GET /api/restore-user
+router.get(
+  '/restore-user',
+  (req, res) => {
+    return res.json(req.user);
+  }
+);
 
-// POST /api/signup
-router.post('/signup', async (req, res) => {
-  const { username, email, password } = req.body;
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const user = await User.create({
-    username,
-    email,
-    hashedPassword,
-  });
-  const token = await setTokenCookie(res, user);
-  return res.json({ user: user });
-});
-
-
-// POST /api/logout
-router.post('/logout', (req, res) => {
-  res.clearCookie('token');
-  return res.json({ message: 'Logged out successfully' });
-});
+// GET /api/require-auth
+router.get(
+  '/require-auth',
+  requireAuth,
+  (req, res) => {
+    return res.json(req.user);
+  }
+);
 
 module.exports = router;
