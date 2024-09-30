@@ -1,21 +1,24 @@
 // backend/app.js
-const express = require('express');
-require('express-async-errors');
-const morgan = require('morgan');
-const cors = require('cors');
-const csurf = require('csurf');
-const helmet = require('helmet');
-const cookieParser = require('cookie-parser');
-const jwt = require('jsonwebtoken');
-const { environment, port, jwtConfig } = require('./config');
+import express, { json } from 'express';
+import 'express-async-errors';
+import morgan from 'morgan';
+import cors from 'cors';
+import csurf from 'csurf';
+import { crossOriginResourcePolicy } from 'helmet';
+import cookieParser from 'cookie-parser';
+import jwt from 'jsonwebtoken';
+import { environment, port, jwtConfig } from './config';
+import routes from './routes';
+import { ValidationError } from 'sequelize';
+app.use(routes);
+app.use(morgan('dev'));
+app.use(cookieParser());
+app.use(json());
+const app = express();
 
 const isProduction = environment === 'production';
 
-const app = express();
 
-app.use(morgan('dev'));
-app.use(cookieParser());
-app.use(express.json());
 
 if (!isProduction) {
   // enable cors only in development
@@ -24,7 +27,7 @@ if (!isProduction) {
 
 // helmet helps set a variety of headers to better secure your app
 app.use(
-  helmet.crossOriginResourcePolicy({
+  crossOriginResourcePolicy({
     policy: "cross-origin"
   })
 );
@@ -40,8 +43,6 @@ app.use(
   })
 );
 
-const routes = require('./routes');
-app.use(routes);
 
 
 
@@ -57,7 +58,6 @@ app.use((_req, _res, next) => {
 
   // backend/app.js
 // ...
-const { ValidationError } = require('sequelize');
 
 // ...
 
@@ -90,4 +90,4 @@ app.use((err, _req, res, _next) => {
     });
   });
 
-module.exports = app;
+export default app;

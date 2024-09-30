@@ -1,4 +1,4 @@
-const { validationResult } = require('express-validator');
+import { validationResult } from 'express-validator';
 
 // Middleware for formatting errors from express-validator middleware
 const handleValidationErrors = (req, res, next) => {
@@ -19,6 +19,6 @@ const handleValidationErrors = (req, res, next) => {
   next();
 };
 
-module.exports = {
+export default {
   handleValidationErrors,
 };

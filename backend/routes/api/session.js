@@ -1,18 +1,10 @@
 // backend/routes/api/session.js
-const express = require('express');
-const { Op } = require ('sequelize');
-const bcrypt = require ('bcryptjs');
-const router = express.Router();
-const { setTokenCookie, restoreUser } = require('/Users/jameshightower/Desktop/swe/projects/01-BetterBnB/backend/utils/auth');
-const { User } = require('../../db/models');
-<<<<<<< HEAD
-
-
-// Log in
-router.post('/', async (req, res, next) => {
-=======
-const { check } = require('express-validator');
-const { handleValidationErrors } = require('../../utils/validation');
+import { Op } from 'sequelize';
+const router = (require('express')).Router();
+import { setTokenCookie, restoreUser } from '/Users/jameshightower/Desktop/swe/projects/01-BetterBnB/backend/utils/auth';
+import { User } from '../../db/models';
+import { check } from 'express-validator';
+import { handleValidationErrors } from '../../utils/validation';
 
 
 const validateLogin = [
@@ -28,7 +20,6 @@ const validateLogin = [
 
 // Log in
 router.post('/', validateLogin, async (req, res, next) => {
->>>>>>> 5cb6ba9 (step before adding columns complete)
     const { credential, password } = req.body;
 
     const user = await User.unscoped().findOne({
@@ -40,7 +31,7 @@ router.post('/', validateLogin, async (req, res, next) => {
         }
     });
 
-    if(!user || !bcrypt.compareSync(password, user.hashedPassword.toString())){
+    if(!user || !(require('bcryptjs')).compareSync(password, user.hashedPassword.toString())){
         const err = new Error ('Login failed');
         err.status = 401;
         err.title =  'Login failed';
@@ -53,11 +44,7 @@ const safeUser = {
     email: user.email,
     username: user.username,
 };
-<<<<<<< HEAD
-await setTokenCookie(res, safeUser);
-=======
     setTokenCookie(res, safeUser);
->>>>>>> 5cb6ba9 (step before adding columns complete)
 return res.json({
     user: safeUser
 });
@@ -70,26 +57,22 @@ router.delete('/', (_req, res) => {
     return res.json({ message: 'Success'});
 });
 
-<<<<<<< HEAD
-=======
 // Restore session user
 router.get(
     '/',
     (req, res) => {
       const { user } = req;
       if (user) {
-        const safeUser = {
-          id: user.id,
-          email: user.email,
-          username: user.username,
-        };
         return res.json({
-          user: safeUser
+          user: {
+            id: user.id,
+            email: user.email,
+            username: user.username,
+          }
         });
       } else return res.json({ user: null });
     }
   );
->>>>>>> 5cb6ba9 (step before adding columns complete)
 
 
-module.exports = router;
+export default router;

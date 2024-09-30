@@ -1,14 +1,11 @@
 // backend/routes/api/users.js
-const express = require('express')
-<<<<<<< HEAD
-const router = express.Router();
-=======
-const bcrypt = require('bcryptjs');
-const { setTokenCookie, requireAuth } = require('../../utils/auth');
-const { User } = require('../../db/models');
-const router = express.Router();
-const { check } = require('express-validator');
-const { handleValidationErrors } = require('../../utils/validation');
+import { Router } from 'express';
+import { hashSync } from 'bcryptjs';
+import { setTokenCookie, requireAuth } from '../../utils/auth';
+import { User } from '../../db/models';
+const router = Router();
+import { check } from 'express-validator';
+import { handleValidationErrors } from '../../utils/validation';
 
 
 
@@ -41,7 +38,7 @@ router.post(
     '/',validateSignup,
     async (req, res) => {
         const { email, password, username } = req.body;
-        const hashedPassword = bcrypt.hashSync(password);
+        const hashedPassword = hashSync(password);
         const user = await User.create({
             email,
             username,
@@ -62,6 +59,5 @@ router.post(
     }
 );
 
->>>>>>> 5cb6ba9 (step before adding columns complete)
 
-module.exports = router;
+export default router;
