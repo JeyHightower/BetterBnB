@@ -1,14 +1,16 @@
 // backend/config/database.js
 import { dbFile } from './index';
+const config = require('./index');
 
-export const development = {
+module.exports = {
+  development: {
   storage: dbFile,
   dialect: "sqlite",
   seederStorage: "sequelize",
   logQueryParameters: true,
   typeValidation: true
-};
-export const production = {
+},
+production : {
   use_env_variable: 'DATABASE_URL',
   dialect: 'postgres',
   seederStorage: 'sequelize',
@@ -21,5 +23,5 @@ export const production = {
   define: {
     schema: process.env.SCHEMA
   }
-};
+}};
 

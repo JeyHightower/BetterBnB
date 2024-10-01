@@ -1,24 +1,18 @@
-// backend/app.js
-import express, { json } from 'express';
-import 'express-async-errors';
-import morgan from 'morgan';
-import cors from 'cors';
-import csurf from 'csurf';
-import { crossOriginResourcePolicy } from 'helmet';
-import cookieParser from 'cookie-parser';
-import jwt from 'jsonwebtoken';
-import { environment, port, jwtConfig } from './config';
-import routes from './routes';
-import { ValidationError } from 'sequelize';
-app.use(routes);
-app.use(morgan('dev'));
-app.use(cookieParser());
-app.use(json());
-const app = express();
+const express = require('express');
+const morgan = require('morgan');
+const cors = require('cors');
+const csurf = require('csurf');
+const helmet = require('helmet');
+const cookieParser = require('cookie-parser');
+const { environment } = require('./config');
 
 const isProduction = environment === 'production';
 
+const app = express();
 
+app.use(morgan('dev'));
+app.use(cookieParser());
+app.use(express.json());
 
 if (!isProduction) {
   // enable cors only in development
@@ -27,7 +21,7 @@ if (!isProduction) {
 
 // helmet helps set a variety of headers to better secure your app
 app.use(
-  crossOriginResourcePolicy({
+  helmet.crossOriginResourcePolicy({
     policy: "cross-origin"
   })
 );
@@ -43,23 +37,17 @@ app.use(
   })
 );
 
-
-
+const routes = require('./routes');
+app.use(routes);
 
 // Catch unhandled requests and forward to error handler.
 app.use((_req, _res, next) => {
-    const err = new Error("The requested resource couldn't be found.");
-    err.title = "Resource Not Found";
-    err.errors = { message: "The requested resource couldn't be found." };
-    err.status = 404;
-    next(err);
-  });
-
-
-  // backend/app.js
-// ...
-
-// ...
+  const err = new Error("The requested resource couldn't be found.");
+  err.title = "Resource Not Found";
+  err.errors = { message: "The requested resource couldn't be found." };
+  err.status = 404;
+  next(err);
+});
 
 // Process sequelize errors
 app.use((err, _req, _res, next) => {
@@ -75,19 +63,16 @@ app.use((err, _req, _res, next) => {
   next(err);
 });
 
-
-// backend/app.js
-// ...
 // Error formatter
 app.use((err, _req, res, _next) => {
-    res.status(err.status || 500);
-    console.error(err);
-    res.json({
-      title: err.title || 'Server Error',
-      message: err.message,
-      errors: err.errors,
-      stack: isProduction ? null : err.stack
-    });
+  res.status(err.status || 500);
+  console.error(err);
+  res.json({
+    title: err.title || 'Server Error',
+    message: err.message,
+    errors: err.errors,
+    stack: isProduction ? null : err.stack
   });
+});
 
-export default app;
+module.exports = app;

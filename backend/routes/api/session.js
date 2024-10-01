@@ -1,78 +1,72 @@
 // backend/routes/api/session.js
-import { Op } from 'sequelize';
-const router = (require('express')).Router();
-import { setTokenCookie, restoreUser } from '/Users/jameshightower/Desktop/swe/projects/01-BetterBnB/backend/utils/auth';
-import { User } from '../../db/models';
-import { check } from 'express-validator';
-import { handleValidationErrors } from '../../utils/validation';
-
-
-const validateLogin = [
-    check('credential')
-      .exists({ checkFalsy: true })
-      .notEmpty()
-      .withMessage('Please provide a valid email or username.'),
-    check('password')
-      .exists({ checkFalsy: true })
-      .withMessage('Please provide a password.'),
-    handleValidationErrors
-  ];
+const express = require('express');
+const { Op } = require('sequelize');
+const bcrypt = require('bcryptjs');
+const { setTokenCookie, restoreUser } = require('../../utils/auth');
+const { User } = require('../../db/models');
+const router = express.Router();
 
 // Log in
-router.post('/', validateLogin, async (req, res, next) => {
+router.post(
+  '/',
+  async (req, res, next) => {
     const { credential, password } = req.body;
 
     const user = await User.unscoped().findOne({
-        where: {
-            [Op.or]:{
-                username: credential,
-                email: credential
-            }
+      where: {
+        [Op.or]: {
+          username: credential,
+          email: credential
         }
+      }
     });
 
-    if(!user || !(require('bcryptjs')).compareSync(password, user.hashedPassword.toString())){
-        const err = new Error ('Login failed');
-        err.status = 401;
-        err.title =  'Login failed';
-        err.errors = { credential: 'The provided credentials were invalid.'};
-        return next(err);
+    if (!user || !bcrypt.compareSync(password, user.hashedPassword.toString())) {
+      const err = new Error('Login failed');
+      err.status = 401;
+      err.title = 'Login failed';
+      err.errors = { credential: 'The provided credentials were invalid.' };
+      return next(err);
     }
 
-const safeUser = {
-    id: user.id,
-    email: user.email,
-    username: user.username,
-};
-    setTokenCookie(res, safeUser);
-return res.json({
-    user: safeUser
-});
-});
+    const safeUser = {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      username: user.username,
+    };
 
-//Log Out
+    await setTokenCookie(res, safeUser);
+    return res.json({ user: safeUser });
+  }
+);
 
-router.delete('/', (_req, res) => {
+// Log out
+router.delete(
+  '/',
+  (_req, res) => {
     res.clearCookie('token');
-    return res.json({ message: 'Success'});
-});
+    return res.json({ message: 'success' });
+  }
+);
 
 // Restore session user
 router.get(
-    '/',
-    (req, res) => {
-      const { user } = req;
-      if (user) {
-        return res.json({
-          user: {
-            id: user.id,
-            email: user.email,
-            username: user.username,
-          }
-        });
-      } else return res.json({ user: null });
-    }
-  );
+  '/',
+  (req, res) => {
+    const { user } = req;
+    if (user) {
+      const safeUser = {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        username: user.username,
+      };
+      return res.json({ user: safeUser });
+    } else return res.json({ user: null });
+  }
+);
 
-
-export default router;
+module.exports = router;

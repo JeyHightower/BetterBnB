@@ -30,7 +30,7 @@
     "mysql2": "^3.11.3",
     "per-env": "^1.0.2",
     "pg": "^8.13.0",
-    "sequelize": "^6.37.3",
+    "sequelize": "^7.0.0-alpha.1",
     "sequelize-cli": "^6.6.2"
   },
   "devDependencies": {
